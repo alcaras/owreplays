@@ -46,6 +46,9 @@ def main():
         html = p.read_text()
         m = re.search(r'"game":"([^"]*)"', html)
         game = m.group(1) if m else p.stem
+        go = re.search(r'"gameOver":\{"team":\d+,"winner":"([^"]*)","victory":"([^"]*)","turn":(\d+)\}', html)
+        if go:
+            game += f" — 🏆 {go.group(1)} by {go.group(2)} T{go.group(3)}"
         players = re.search(r'"players":({.*?}})', html)
         meta = f"{p.stat().st_size // 1024 // 1024} MB"
         tm = re.search(r'"turns":\[{"t":(\d+)', html)
