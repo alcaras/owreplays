@@ -36,6 +36,9 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
  .card .links a{{color:#dfe2e6;text-decoration:none;background:#1b1e24;
    border:1px solid #3a3d44;border-radius:6px;padding:5px 12px;font-size:13px}}
  .card .links a:hover{{border-color:#ffd27a}}
+ .card .links a.rep{{color:#e8c9a0;border-color:#6b4a1f}}
+ .note{{max-width:1100px;margin:0 auto;padding:0 22px 18px;color:#9aa1ab;font-size:12.5px}}
+ .note b{{color:#e8c9a0}}
 </style></head><body>
 <header><b>Old World Replays</b>
 <div class=sub>experimental replay viewer for Old World games — turn-by-turn dual-POV
@@ -44,7 +47,13 @@ dark = unexplored · built with
 <a href="https://github.com/alcaras/ow-replay-analyzer">ow-replay-analyzer</a></div></header>
 <div id=grid>
 {cards}
-</div></body></html>
+</div>
+<div class=note><b>⚠ About the analysis reports:</b> they're written by Claude (an AI)
+from data extracted out of the save files. The extraction is validated against the game's
+own recorded numbers, but the interpretation is a machine's, not a strong player's —
+causal claims are inference and mistakes are likely. Read them as prompts for your own
+analysis.</div>
+</body></html>
 """
 
 
@@ -76,7 +85,8 @@ def main():
             except Exception:
                 pass
         rp = p.with_name(p.stem + "-report.html")
-        report = f'<a href="games/{rp.name}">📊 analysis report</a>' if rp.exists() else ""
+        report = (f'<a class=rep href="games/{rp.name}">📊 AI analysis</a>'
+                  if rp.exists() else "")
         if p.stem in manual and manual[p.stem].get("note"):
             meta += " · " + manual[p.stem]["note"]
         cards.append(CARD.format(fn=p.name, title=game, meta=meta, report=report))
