@@ -49,6 +49,9 @@ dark = unexplored · built with
 
 
 def main():
+    # optional manual metadata for games whose final save isn't archived
+    meta_path = ROOT / "games.json"
+    manual = json.loads(meta_path.read_text()) if meta_path.exists() else {}
     cards = []
     for p in sorted((ROOT / "games").glob("*.html")):
         if p.stem.endswith("-report"):
@@ -59,6 +62,8 @@ def main():
         go = re.search(r'"gameOver":\{"team":\d+,"winner":"([^"]*)","victory":"([^"]*)","turn":(\d+)\}', html)
         if go:
             game += f" — 🏆 {go.group(1)} by {go.group(2)} T{go.group(3)}"
+        elif p.stem in manual and manual[p.stem].get("result"):
+            game += f" — {manual[p.stem]['result']}"
         meta = f"{p.stat().st_size // 1024 // 1024} MB"
         tmax = re.findall(r'\{"t":(\d+),"tiles"', html)
         if tmax:
@@ -72,6 +77,8 @@ def main():
                 pass
         rp = p.with_name(p.stem + "-report.html")
         report = f'<a href="games/{rp.name}">📊 analysis report</a>' if rp.exists() else ""
+        if p.stem in manual and manual[p.stem].get("note"):
+            meta += " · " + manual[p.stem]["note"]
         cards.append(CARD.format(fn=p.name, title=game, meta=meta, report=report))
     (ROOT / "index.html").write_text(PAGE.format(cards="\n".join(cards)))
     print(f"index.html: {len(cards)} game(s)")
